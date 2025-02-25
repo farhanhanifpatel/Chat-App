@@ -1,6 +1,5 @@
 import { useChatStore } from '../store/useChatStore'
 import { useEffect, useRef } from 'react'
-
 import ChatHeader from './ChatHeader'
 import MessageInput from './MessageInput'
 import MessageSkeleton from './skeletons/MessageSkeleton'
@@ -13,11 +12,14 @@ const ChatContainer = () => {
     const messageEndRef = useRef(null)
 
     useEffect(() => {
-        getMessage(selectedUser._id)
-    }, [selectedUser._id, getMessage])
+        if (selectedUser) {
+            getMessage(selectedUser._id)
+        }
+    }, [selectedUser, getMessage])
 
     useEffect(() => {
-        if (messageEndRef.current && messages) {
+        console.log('Messages Data:', messages) // Log messages to inspect the data
+        if (messageEndRef.current) {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' })
         }
     }, [messages])
@@ -32,6 +34,10 @@ const ChatContainer = () => {
         )
     }
 
+    if (!selectedUser) {
+        return <div className="flex-1 flex items-center justify-center">Select a user to start chatting</div>
+    }
+
     return (
         <div className="flex-1 flex flex-col overflow-auto">
             <ChatHeader />
@@ -41,9 +47,8 @@ const ChatContainer = () => {
                     <div
                         key={message._id}
                         className={`chat ${message.senderId === authUser._id ? 'chat-end' : 'chat-start'}`}
-                        ref={messageEndRef}
                     >
-                        <div className=" chat-image avatar">
+                        <div className="chat-image avatar">
                             <div className="size-10 rounded-full border">
                                 <img
                                     src={
@@ -72,10 +77,12 @@ const ChatContainer = () => {
                         </div>
                     </div>
                 ))}
+                <div ref={messageEndRef} />
             </div>
 
             <MessageInput />
         </div>
     )
 }
+
 export default ChatContainer
