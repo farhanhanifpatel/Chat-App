@@ -26,12 +26,12 @@ io.on('connection', socket => {
     io.emit('getOnlineUsers', Object.keys(userSocketMap))
   
     // 💬 Handle real-time message sending
-    socket.on("sendMessage", ({ senderId, receiverId, message }) => {
-      const receiverSocketId = getReceiverSocketId(receiverId)
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("newMessage", message)
-      }
-    })
+    // socket.on("sendMessage", ({ senderId, receiverId, message }) => {
+    //   const receiverSocketId = getReceiverSocketId(receiverId)
+    //   if (receiverSocketId) {
+    //     io.to(receiverSocketId).emit("newMessage", message)
+    //   }
+    // })
   
     // ❌ Handle user disconnect
     socket.on('disconnect', () => {
