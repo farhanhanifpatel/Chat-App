@@ -10,6 +10,11 @@ export const useChatStore = create((set, get) => ({
     isUserLoading: false,
     isMessageLoading: false,
 
+    setMessages: updater =>
+        set(state => ({
+          messages: typeof updater === 'function' ? updater(state.messages) : updater,
+        })),
+
     getUsers: async () => {
         set({ isUserLoading: true })
         try {
@@ -36,11 +41,11 @@ export const useChatStore = create((set, get) => ({
     },
 
     sendMessage: async messageData => {
-        const { selectedUser, message } = get()
+        const { selectedUser, messages } = get()
         try {
             const res = await axiosInstance.post(`/message/send/${selectedUser._id}`, messageData)
             console.log('Response:', res) // Log the full response to see its structure
-            set({ message: [...message, res.data] })
+            set({ messages: [...messages, res.data] })
         } catch (error) {
             console.log('Error:', error) // Log the error to understand its details
             toast.error(error.response?.data?.message || 'An error occurred')
@@ -54,7 +59,9 @@ export const useChatStore = create((set, get) => ({
         socket.emit('join', selectedUser._id)
         socket.on('newMessage', newMessage => {
             if (newMessage.senderId === selectedUser._id) {
-                set({ message: [...get().message, newMessage] })
+                const currentMessages = get().message || []
+                set({ message: [...currentMessages, newMessage] })
+
             }
         })
     },

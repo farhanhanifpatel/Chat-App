@@ -32,6 +32,20 @@ const ChatContainer = () => {
             messageEndRef.current.scrollIntoView({ behavior: 'smooth' })
         }
     }, [messages])
+
+    useEffect(() => {
+        const socket = useAuthStore.getState().socket
+        const setMessages = useChatStore.getState().setMessages
+      
+        socket.on("newMessage", message => {
+          setMessages(prev => [...prev, message])
+        })
+      
+        return () => socket.off("newMessage")
+      }, [])
+      
+      
+      
     if (isMessageLoading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto">

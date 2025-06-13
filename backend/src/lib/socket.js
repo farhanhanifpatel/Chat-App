@@ -18,15 +18,27 @@ export function getReceiverSocketId(userId) {
 
 io.on('connection', socket => {
     console.log('connection', socket.id)
+  
     const userId = socket.handshake.query.userId
     if (userId) userSocketMap[userId] = socket.id
-
-    // io.emit() is used to send events to all the connected clients
+  
+    // Send online user list to everyone
     io.emit('getOnlineUsers', Object.keys(userSocketMap))
-    socket.on('disconnect', () => {
-        console.log('disconnect', socket.id)
-        delete userSocketMap[userId]
-        io.emit('getOnlineUsers', Object.keys(userSocketMap))
+  
+    // 💬 Handle real-time message sending
+    socket.on("sendMessage", ({ senderId, receiverId, message }) => {
+      const receiverSocketId = getReceiverSocketId(receiverId)
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", message)
+      }
     })
-})
+  
+    // ❌ Handle user disconnect
+    socket.on('disconnect', () => {
+      console.log('disconnect', socket.id)
+      delete userSocketMap[userId]
+      io.emit('getOnlineUsers', Object.keys(userSocketMap))
+    })
+  })
+  
 export { io, server, app }
